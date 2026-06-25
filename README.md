@@ -47,7 +47,7 @@ After extended use, `~/.claude/` can grow to **1.8 GB+** across **10,000+ files*
 
 ## Installation
 
-### Quick install (Linux / macOS)
+### Quick install (Linux / macOS / Windows)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/GarrickZ2/claude-code-cleaner/master/install.sh | bash
@@ -59,11 +59,13 @@ Or install a specific version:
 curl -fsSL https://raw.githubusercontent.com/GarrickZ2/claude-code-cleaner/master/install.sh | bash -s v0.1.0
 ```
 
-Custom install directory:
+Custom install directory (Linux / macOS):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/GarrickZ2/claude-code-cleaner/master/install.sh | INSTALL_DIR=~/.local/bin bash
 ```
+
+On Windows (Git Bash / WSL), the binary is installed to `%LOCALAPPDATA%\claude-code-cleaner\bin\`.
 
 ### Via cargo
 
@@ -73,7 +75,7 @@ cargo install claude-code-cleaner
 
 ### From GitHub Releases
 
-Download the latest binary for your platform from [Releases](https://github.com/GarrickZ2/claude-code-cleaner/releases), extract, and place it in your `$PATH`.
+Download the latest binary for your platform from [Releases](https://github.com/GarrickZ2/claude-code-cleaner/releases), extract, and place it in your `$PATH` (Linux/macOS) or `%LOCALAPPDATA%\claude-code-cleaner\bin\` (Windows).
 
 ### From source
 
@@ -83,7 +85,7 @@ cd claude-code-cleaner
 cargo build --release
 ```
 
-The binary will be at `target/release/claude-code-cleaner`.
+The binary will be at `target/release/claude-code-cleaner` (Linux/macOS) or `target/release/claude-code-cleaner.exe` (Windows).
 
 ## Usage
 
@@ -192,8 +194,9 @@ src/
 
 ## Requirements
 
-- Rust 1.70+
+- Rust 1.70+ (to build from source)
 - A terminal with Unicode support
+- **Windows**: Git Bash (for `install.sh`) or WSL; alternatively use `cargo install` or download from Releases
 
 ## License
 
