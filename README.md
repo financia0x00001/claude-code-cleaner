@@ -1,15 +1,22 @@
 # Claude Code Cleaner
 
-A terminal UI (TUI) tool for interactively cleaning up the `~/.claude/` directory. Inspired by CleanMyMac, it provides a visual, guided workflow to reclaim disk space from accumulated Claude Code data.
+<div align="center">
+
+![Rust](https://img.shields.io/badge/rust-1.70+-orange)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
+
+> 🧹 **Interactive TUI tool to reclaim disk space from Claude Code**
 
 After extended use, `~/.claude/` can grow to **1.8 GB+** across **10,000+ files** — old session data, debug logs, telemetry, orphaned project caches, and more. This tool helps you see exactly what's there, choose what to clean, and safely reclaim space.
+
+[Features](#features) · [Installation](#installation) · [Usage](#usage) · [Safety](#safety)
+
+</div>
 
 ## Screenshots
 
 ![Scan](screenshot/scan.jpeg)
-
-![Config](screenshot/config.png)
-
 ![Preview](screenshot/preview.png)
 
 ## Features
@@ -50,19 +57,19 @@ After extended use, `~/.claude/` can grow to **1.8 GB+** across **10,000+ files*
 ### Quick install (Linux / macOS / Windows)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/GarrickZ2/claude-code-cleaner/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/financia0x00001/claude-code-cleaner/master/install.sh | bash
 ```
 
 Or install a specific version:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/GarrickZ2/claude-code-cleaner/master/install.sh | bash -s v0.1.0
+curl -fsSL https://raw.githubusercontent.com/financia0x00001/claude-code-cleaner/master/install.sh | bash -s v0.1.2
 ```
 
 Custom install directory (Linux / macOS):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/GarrickZ2/claude-code-cleaner/master/install.sh | INSTALL_DIR=~/.local/bin bash
+curl -fsSL https://raw.githubusercontent.com/financia0x00001/claude-code-cleaner/master/install.sh | INSTALL_DIR=~/.local/bin bash
 ```
 
 On Windows (Git Bash / WSL), the binary is installed to `%LOCALAPPDATA%\claude-code-cleaner\bin\`.
@@ -75,12 +82,12 @@ cargo install claude-code-cleaner
 
 ### From GitHub Releases
 
-Download the latest binary for your platform from [Releases](https://github.com/GarrickZ2/claude-code-cleaner/releases), extract, and place it in your `$PATH` (Linux/macOS) or `%LOCALAPPDATA%\claude-code-cleaner\bin\` (Windows).
+Download the latest binary for your platform from [Releases](https://github.com/financia0x00001/claude-code-cleaner/releases), extract, and place it in your `$PATH` (Linux/macOS) or `%LOCALAPPDATA%\claude-code-cleaner\bin\` (Windows).
 
 ### From source
 
 ```bash
-git clone https://github.com/GarrickZ2/claude-code-cleaner.git
+git clone https://github.com/financia0x00001/claude-code-cleaner.git
 cd claude-code-cleaner
 cargo build --release
 ```
