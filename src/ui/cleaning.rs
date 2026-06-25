@@ -1,5 +1,6 @@
 use crate::app::App;
 use crate::cleaner::CleanMessage;
+use crate::i18n::*;
 use crate::ui::widgets;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::style::{Color, Modifier, Style};
@@ -20,9 +21,9 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
 
     let dry_run = app.settings.dry_run;
     let block_title = if dry_run {
-        " Clean [DRY RUN] "
+        translate_cleaning_dry_run_title()
     } else {
-        " Clean "
+        translate_cleaning_title()
     };
     let block = Block::default()
         .borders(Borders::ALL)
@@ -45,13 +46,13 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         let status_line = if dry_run {
             Line::from(vec![
                 Span::styled(
-                    " DRY RUN COMPLETE ",
+                    translate_cleaning_dry_run_complete(),
                     Style::default()
                         .fg(Color::Cyan)
                         .add_modifier(Modifier::BOLD),
                 ),
                 Span::raw(format!(
-                    " Would free {} | {} errors",
+                    " 将释放 {} | {} 个错误",
                     widgets::format_size(app.clean_total_freed),
                     app.clean_total_errors.len(),
                 )),
@@ -59,13 +60,13 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         } else {
             Line::from(vec![
                 Span::styled(
-                    " COMPLETE ",
+                    translate_cleaning_complete(),
                     Style::default()
                         .fg(Color::Green)
                         .add_modifier(Modifier::BOLD),
                 ),
                 Span::raw(format!(
-                    " Freed {} | {} errors",
+                    " 已释放 {} | {} 个错误",
                     widgets::format_size(app.clean_total_freed),
                     app.clean_total_errors.len(),
                 )),
@@ -98,9 +99,9 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         let status_line = Line::from(vec![
             Span::styled(
                 if dry_run {
-                    " DRY RUN... "
+                    translate_cleaning_dry_run_progress()
                 } else {
-                    " CLEANING... "
+                    translate_cleaning_cleaning_progress()
                 },
                 Style::default()
                     .fg(bar_color)
@@ -155,15 +156,15 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
                 } else {
                     Style::default().fg(Color::Yellow)
                 };
-                let done_label = if dry_run { " WOULD " } else { " DONE " };
-                let freed_label = if dry_run { " would free " } else { " freed " };
+                let done_label = if dry_run { " 将完成 " } else { " 已完成 " };
+                let freed_label = if dry_run { " 将释放 " } else { " 已释放 " };
                 Some(ListItem::new(Line::from(vec![
                     Span::styled(done_label, style),
                     Span::styled(category, Style::default().fg(Color::White)),
                     Span::raw(format!("{}{}", freed_label, widgets::format_size(*freed))),
                     if !errors.is_empty() {
                         Span::styled(
-                            format!(" ({} errors)", errors.len()),
+                            format!(" ({} 个错误)", errors.len()),
                             Style::default().fg(Color::Red),
                         )
                     } else {
@@ -173,7 +174,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
             }
             CleanMessage::Complete { .. } => None,
             CleanMessage::Error(e) => Some(ListItem::new(Line::from(Span::styled(
-                format!(" ERROR: {}", e),
+                format!(" 错误: {}", e),
                 Style::default().fg(Color::Red),
             )))),
         })
@@ -193,12 +194,14 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
     if app.clean_complete {
         let summary_text = if dry_run {
             format!(
-                "Would free: {} (no files were deleted)",
+                "{}: {}（未删除任何文件）",
+                translate_cleaning_would_free(),
                 widgets::format_size(app.clean_total_freed)
             )
         } else {
             format!(
-                "Total freed: {}",
+                "{}: {}",
+                translate_cleaning_total_freed(),
                 widgets::format_size(app.clean_total_freed)
             )
         };
@@ -213,9 +216,12 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
             ),
             Span::raw("    "),
             Span::styled("[q]", Style::default().fg(Color::Yellow)),
-            Span::raw(" Quit  "),
+            Span::raw(" "),
+            Span::styled(translate_cleaning_quite(), Style::default().fg(Color::White)),
+            Span::raw("  "),
             Span::styled("[s]", Style::default().fg(Color::Yellow)),
-            Span::raw(" Rescan"),
+            Span::raw(" "),
+            Span::styled(translate_cleaning_rescan(), Style::default().fg(Color::White)),
         ]));
         f.render_widget(summary, chunks[2]);
     }

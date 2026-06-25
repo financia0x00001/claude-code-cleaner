@@ -1,4 +1,5 @@
 use crate::app::App;
+use crate::i18n::*;
 use crate::ui::widgets;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::style::{Color, Modifier, Style};
@@ -20,7 +21,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
 
     let block = Block::default()
         .borders(Borders::ALL)
-        .title(" Projects ")
+        .title(translate_projects_title())
         .title_style(
             Style::default()
                 .fg(Color::Cyan)
@@ -40,7 +41,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
             Span::styled(" /", Style::default().fg(Color::Yellow)),
             Span::raw(&app.project_filter),
             Span::styled(
-                "_",
+                " （输入中）",
                 Style::default()
                     .fg(Color::White)
                     .add_modifier(Modifier::SLOW_BLINK),
@@ -48,16 +49,19 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         ])
     } else if !app.project_filter.is_empty() {
         Line::from(vec![
-            Span::styled(" Filter: ", Style::default().fg(Color::DarkGray)),
+            Span::styled(
+                format!(" {}: ", translate_projects_search_active()),
+                Style::default().fg(Color::DarkGray),
+            ),
             Span::styled(&app.project_filter, Style::default().fg(Color::Yellow)),
             Span::styled(
-                "  (/ to edit, Esc to clear)",
+                " （按 Esc 清除）".to_string(),
                 Style::default().fg(Color::DarkGray),
             ),
         ])
     } else {
         Line::from(Span::styled(
-            " [Space] Toggle  [a] Select All  [o] Orphans Only  [n] Unselect All  [/] Search",
+            " [空格] 切换  [a] 全选  [o] 仅孤立  [n] 取消  [/] 搜索",
             Style::default().fg(Color::DarkGray),
         ))
     };
@@ -98,10 +102,10 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
 
         let header = Row::new(vec![
             "",
-            "Project Path",
-            "Status",
-            "Reclaimable",
-            "Last Modified",
+            "项目路径",
+            "状态",
+            "可回收",
+            "最后修改",
         ])
         .style(
             Style::default()
@@ -143,19 +147,19 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
                 };
 
                 let (status, _status_color) = if proj.is_orphan {
-                    ("ORPHAN", Color::Red)
+                    (translate_projects_table_status_orphan(), Color::Red)
                 } else {
-                    ("active", Color::Green)
+                    (translate_projects_table_status_active(), Color::Green)
                 };
 
                 // For orphans: show full size (will delete all)
                 // For active: show expired file size
                 let reclaimable = proj.expired_size(expiry_days);
                 let reclaimable_str = if proj.is_orphan {
-                    format!("{} (all)", widgets::format_size(reclaimable))
+                    format!("{}{}", widgets::format_size(reclaimable), translate_projects_table_reclaimable_all())
                 } else if reclaimable > 0 {
                     let expired_count = proj.expired_count(expiry_days);
-                    format!("{} ({}f)", widgets::format_size(reclaimable), expired_count)
+                    format!("{}（{}个过期）", widgets::format_size(reclaimable), expired_count)
                 } else {
                     "-".into()
                 };
@@ -243,10 +247,14 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         };
 
         let summary = Paragraph::new(Line::from(vec![Span::raw(format!(
-            "  {} projects ({} orphan, {} active) | Selected: {} ({}){}",
+            "  {} {}（{} {}, {} {}） | {}: {}（{}）{}",
             project_count_str,
+            translate_projects_summary_projects(),
             orphan_count,
+            translate_projects_summary_orphan(),
             active_count,
+            translate_projects_summary_active(),
+            translate_projects_summary_selected(),
             selected_count,
             widgets::format_size(selected_size),
             pos_info,
@@ -254,7 +262,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         .style(Style::default().fg(Color::DarkGray));
         f.render_widget(summary, summary_area);
     } else {
-        let p = Paragraph::new("No scan data.").style(Style::default().fg(Color::DarkGray));
+        let p = Paragraph::new("无扫描数据。").style(Style::default().fg(Color::DarkGray));
         f.render_widget(p, table_area);
     }
 }

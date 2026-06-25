@@ -1,4 +1,5 @@
 use crate::app::{App, SelectSection};
+use crate::i18n::*;
 use crate::model::CleanSettings;
 use crate::ui::widgets;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
@@ -19,7 +20,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
 
     let block = Block::default()
         .borders(Borders::ALL)
-        .title(" Select & Configure ")
+        .title(translate_select_title())
         .title_style(
             Style::default()
                 .fg(Color::Cyan)
@@ -52,9 +53,8 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
             let has_expiry = !cat.file_ages.is_empty();
 
             let detail = if has_expiry && exp_count < cat.file_count {
-                // Show expired subset vs total
                 format!(
-                    "{:>10}  {:>5}/{} files (>{} days)",
+                    "{:>10}  {:>5}/{} 个文件（>{}天）",
                     widgets::format_size(exp_size),
                     exp_count,
                     cat.file_count,
@@ -62,7 +62,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
                 )
             } else {
                 format!(
-                    "{:>10}  {:>5} files",
+                    "{:>10}  {:>5} 个文件",
                     widgets::format_size(exp_size),
                     exp_count
                 )
@@ -77,7 +77,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
 
         // ── Separator: ~/.claude.json cleanup ──
         items.push(ListItem::new(Line::from(Span::styled(
-            "  ── ~/.claude.json Cleanup ────────────────────────────────",
+            translate_select_config_header(),
             Style::default().fg(Color::DarkGray),
         ))));
 
@@ -86,22 +86,22 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         let cj_items: [(bool, &str, &str, usize, u64); 3] = [
             (
                 cj.orphan_projects_selected,
-                "Orphan projects in JSON",
-                "Remove entries for deleted project paths",
+                translate_select_orphan_label(),
+                translate_select_orphan_desc(),
                 cj.orphan_projects_count,
                 cj.orphan_projects_size,
             ),
             (
                 cj.metrics_selected,
-                "Session metrics",
-                "Strip lastModel/Cost/Duration/FPS/Lines data",
+                translate_select_metrics_label(),
+                translate_select_metrics_desc(),
                 cj.metrics_entries_count,
                 cj.metrics_size,
             ),
             (
                 cj.cache_selected,
-                "Cached flags & data",
-                "Remove statsig/growth/telemetry caches",
+                translate_select_cache_label(),
+                translate_select_cache_desc(),
                 cj.cache_keys_count,
                 cj.cache_size,
             ),
@@ -126,7 +126,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
                 Span::styled(format!("{} {} ", cursor, checkbox), style),
                 Span::styled(format!("{:<18}", label), style),
                 Span::styled(
-                    format!("{:>10}  {:>5} items", widgets::format_size(*size), count),
+                    format!("{:>10}  {:>5} 个", widgets::format_size(*size), count),
                     Style::default().fg(Color::DarkGray),
                 ),
             ])));
@@ -142,7 +142,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
 
         // ── Separator: Settings ──
         items.push(ListItem::new(Line::from(Span::styled(
-            "  ── Settings ──────────────────────────────────────────────",
+            translate_select_settings_header(),
             Style::default().fg(Color::DarkGray),
         ))));
 
@@ -196,28 +196,36 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         let cj_size = cj.reclaimable_size();
 
         let summary = Paragraph::new(vec![Line::from(vec![
-            Span::raw("  Selected: "),
+            Span::raw("  "),
+            Span::styled(translate_select_selected(), Style::default().fg(Color::DarkGray)),
             Span::styled(
                 format!(
-                    "{} categories + ~{} JSON cleanup",
+                    "{} {} + ~{} {}",
                     selected_count,
+                    translate_select_categories_label(),
                     widgets::format_size(cj_size),
+                    "JSON清理",
                 ),
                 Style::default()
                     .fg(Color::Green)
                     .add_modifier(Modifier::BOLD),
             ),
             Span::styled(
-                format!("  (~{})", widgets::format_size(selected_size + cj_size)),
+                format!("（{}）", widgets::format_size(selected_size + cj_size)),
                 Style::default().fg(Color::DarkGray),
             ),
             Span::raw("    "),
             Span::styled("[a]", Style::default().fg(Color::Yellow)),
-            Span::raw("ll  "),
+            Span::raw(" "),
+            Span::styled(translate_select_all(), Style::default().fg(Color::White)),
+            Span::raw("  "),
             Span::styled("[n]", Style::default().fg(Color::Yellow)),
-            Span::raw("one  "),
+            Span::raw(" "),
+            Span::styled(translate_select_none(), Style::default().fg(Color::White)),
+            Span::raw("  "),
             Span::styled("[d]", Style::default().fg(Color::Yellow)),
-            Span::raw("efault"),
+            Span::raw(" "),
+            Span::styled(translate_select_default(), Style::default().fg(Color::White)),
         ])]);
         f.render_widget(summary, chunks[1]);
     } else {

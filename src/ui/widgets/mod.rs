@@ -1,3 +1,4 @@
+use crate::i18n::*;
 use bytesize::ByteSize;
 use chrono::{DateTime, Local};
 
@@ -6,21 +7,22 @@ pub fn format_size(bytes: u64) -> String {
     ByteSize::b(bytes).to_string()
 }
 
-/// Format a datetime as relative age (e.g., "3d ago")
+/// Format a datetime as relative age in Chinese (e.g., "3天前")
 pub fn format_age(dt: &DateTime<Local>) -> String {
     let now = Local::now();
     let duration = now.signed_duration_since(*dt);
+    let days = duration.num_days();
 
-    if duration.num_days() > 365 {
-        format!("{}y ago", duration.num_days() / 365)
-    } else if duration.num_days() > 30 {
-        format!("{}mo ago", duration.num_days() / 30)
-    } else if duration.num_days() > 0 {
-        format!("{}d ago", duration.num_days())
+    if days > 365 {
+        translate_format_age_years((days as f64 / 365.0).floor() as u64)
+    } else if days > 30 {
+        translate_format_age_months((days as f64 / 30.0).floor() as u64)
+    } else if days > 0 {
+        translate_format_age_days(days)
     } else if duration.num_hours() > 0 {
-        format!("{}h ago", duration.num_hours())
+        translate_format_age_hours(duration.num_hours())
     } else {
-        "just now".to_string()
+        translate_format_age_just_now()
     }
 }
 

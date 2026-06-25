@@ -1,4 +1,5 @@
 use crate::app::App;
+use crate::i18n::*;
 use crate::ui::widgets;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::style::{Color, Modifier, Style};
@@ -19,7 +20,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
 
     let block = Block::default()
         .borders(Borders::ALL)
-        .title(" Step 1: Scan ")
+        .title(translate_dashboard_title())
         .title_style(
             Style::default()
                 .fg(Color::Cyan)
@@ -39,9 +40,11 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
             Span::raw("                                    "),
             Span::styled(
                 format!(
-                    "Total: {}  {} files",
+                    "{}：{}  {} {}",
+                    translate_dashboard_total(),
                     widgets::format_size(result.total_size),
-                    result.total_files
+                    result.total_files,
+                    translate_dashboard_files_label()
                 ),
                 Style::default().fg(Color::Yellow),
             ),
@@ -49,7 +52,13 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         f.render_widget(header, chunks[0]);
 
         // Category table
-        let header_row = Row::new(vec!["Category", "Size", "Files", "Oldest", "Usage"])
+        let header_row = Row::new(vec![
+            "分类",
+            "大小",
+            "文件数",
+            "最旧",
+            "占比",
+        ])
             .style(
                 Style::default()
                     .fg(Color::Cyan)
@@ -104,7 +113,9 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         // Footer: reclaimable
         let reclaimable = result.reclaimable_size(app.settings.expiry_days);
         let footer = Paragraph::new(vec![Line::from(vec![
-            Span::raw("  Reclaimable (current settings): "),
+            Span::raw("  "),
+            Span::styled(translate_dashboard_reclaimable(), Style::default().fg(Color::DarkGray)),
+            Span::raw(": "),
             Span::styled(
                 format!("~{}", widgets::format_size(reclaimable)),
                 Style::default()
@@ -113,20 +124,25 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
             ),
             Span::raw("    "),
             Span::styled("[S]", Style::default().fg(Color::Yellow)),
-            Span::raw(" Scan  "),
+            Span::raw(" "),
+            Span::styled(translate_dashboard_btn_scan(), Style::default().fg(Color::White)),
+            Span::raw("  "),
             Span::styled("[Enter]", Style::default().fg(Color::Yellow)),
-            Span::raw(" Browse  "),
+            Span::raw(" "),
+            Span::styled(translate_dashboard_btn_browse(), Style::default().fg(Color::White)),
+            Span::raw("  "),
             Span::styled("[?]", Style::default().fg(Color::Yellow)),
-            Span::raw(" Help"),
+            Span::raw(" "),
+            Span::styled(translate_dashboard_btn_help(), Style::default().fg(Color::White)),
         ])]);
         f.render_widget(footer, chunks[2]);
     } else {
         let msg = if app.scanning {
             app.scan_progress
                 .clone()
-                .unwrap_or_else(|| "Scanning...".into())
+                .unwrap_or_else(|| translate_dashboard_scanning().into())
         } else {
-            "Press [S] to scan ~/.claude/ directory".into()
+            format!("按 [S] {}", translate_dashboard_no_data())
         };
         let p = Paragraph::new(vec![
             Line::from(""),

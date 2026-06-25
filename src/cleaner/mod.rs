@@ -1,3 +1,4 @@
+use crate::i18n::translate_category_static;
 use crate::model::category::{is_protected, Category};
 use crate::model::*;
 use std::path::Path;
@@ -47,7 +48,7 @@ pub async fn execute_clean(
             continue;
         }
 
-        let cat_name = cat_info.category.to_string();
+        let cat_name = translate_category_static(&cat_info.category.to_string());
         let mut freed: u64 = 0;
         let mut errors: Vec<String> = Vec::new();
 
@@ -92,7 +93,7 @@ pub async fn execute_clean(
                     now,
                     expiry_threshold,
                     &tx,
-                    &cat_name,
+                    cat_name,
                 )
                 .await
                 {
@@ -108,7 +109,7 @@ pub async fn execute_clean(
         total_freed += freed;
         all_errors.extend(errors.clone());
         let _ = tx.send(CleanMessage::CategoryDone {
-            category: cat_name,
+            category: cat_name.to_string(),
             freed,
             errors,
         });
@@ -132,7 +133,7 @@ pub async fn execute_clean(
             if settings.dry_run {
                 total_freed += freed_size;
                 let _ = tx.send(CleanMessage::CategoryDone {
-                    category: cat_name,
+                    category: cat_name.to_string(),
                     freed: freed_size,
                     errors: vec![],
                 });
@@ -141,7 +142,7 @@ pub async fn execute_clean(
                     Ok(_) => {
                         total_freed += freed_size;
                         let _ = tx.send(CleanMessage::CategoryDone {
-                            category: cat_name,
+                            category: cat_name.to_string(),
                             freed: freed_size,
                             errors: vec![],
                         });
@@ -150,7 +151,7 @@ pub async fn execute_clean(
                         let err = format!("Failed to remove {}: {}", proj.data_path.display(), e);
                         all_errors.push(err.clone());
                         let _ = tx.send(CleanMessage::CategoryDone {
-                            category: cat_name,
+                            category: cat_name.to_string(),
                             freed: 0,
                             errors: vec![err],
                         });
@@ -174,7 +175,7 @@ pub async fn execute_clean(
                     total_freed += freed;
                     all_errors.extend(errs.clone());
                     let _ = tx.send(CleanMessage::CategoryDone {
-                        category: cat_name,
+                        category: cat_name.to_string(),
                         freed,
                         errors: errs,
                     });
@@ -183,7 +184,7 @@ pub async fn execute_clean(
                     let err = format!("{}: {}", cat_name, e);
                     all_errors.push(err.clone());
                     let _ = tx.send(CleanMessage::CategoryDone {
-                        category: cat_name,
+                        category: cat_name.to_string(),
                         freed: 0,
                         errors: vec![err],
                     });
@@ -282,7 +283,7 @@ async fn clean_directory(
                     freed += file_size;
                     files_done += 1;
                     let _ = tx.send(CleanMessage::Progress {
-                        category: cat_name.to_string(),
+                        category: translate_category_static(cat_name).to_string(),
                         current_file: path
                             .file_name()
                             .unwrap_or_default()
@@ -298,7 +299,7 @@ async fn clean_directory(
                             freed += file_size;
                             files_done += 1;
                             let _ = tx.send(CleanMessage::Progress {
-                                category: cat_name.to_string(),
+                                category: translate_category_static(cat_name).to_string(),
                                 current_file: path
                                     .file_name()
                                     .unwrap_or_default()

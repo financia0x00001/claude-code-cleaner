@@ -1,3 +1,4 @@
+use crate::i18n::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
@@ -59,8 +60,8 @@ impl CleanSettings {
 
     pub fn field_name(index: usize) -> &'static str {
         match index {
-            0 => "Expiry Threshold (days)",
-            1 => "Dry Run (simulate only)",
+            0 => translate_select_expiry_label(),
+            1 => translate_select_dry_run_label(),
             _ => "",
         }
     }
@@ -70,9 +71,9 @@ impl CleanSettings {
             0 => format!("{}", self.expiry_days),
             1 => {
                 if self.dry_run {
-                    "Yes".into()
+                    "是".into()
                 } else {
-                    "No".into()
+                    "否".into()
                 }
             }
             _ => String::new(),

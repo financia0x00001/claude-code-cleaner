@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2] - 2026-06-25
+
+### Added
+
+- **Full Chinese localization (全面汉化)** — All UI strings translated to Chinese: categories, buttons, labels, help overlay, confirm dialog, status bar, progress messages. The 14 cleanable categories now display as 项目、调试日志、文件历史、遥测数据、Shell 快照、插件、会话记录、待办事项、计划、使用数据、任务、剪贴板缓存、配置备份、历史记录. Time formats localized to X天前/X小时前/刚刚.
+- New `src/i18n.rs` module with comprehensive Chinese translation mappings for all UI strings
+
+### Changed
+
+- All category names, screen titles, button labels, status messages, and help text now render in Chinese by default
+- Time/age formatting uses Chinese units (天/月/年/小时)
+- Yes/No settings display as 是/否
+
+### Fixed
+
+- Clippy warnings from Rust 1.95 (re-applied from 0.1.1)
+
+---
+
 ## [0.1.1] - 2026-05-11
 
 ### Fixed

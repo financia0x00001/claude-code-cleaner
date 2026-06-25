@@ -6,6 +6,7 @@ pub mod projects;
 pub mod widgets;
 
 use crate::app::{App, Screen};
+use crate::i18n::*;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
@@ -92,7 +93,7 @@ fn render_header(f: &mut Frame, _app: &App, area: Rect, use_full_logo: bool) {
         let line = Line::from(vec![
             Span::raw(" ".repeat(pad)),
             Span::styled(
-                text,
+                "Claude Code Cleaner",
                 Style::default()
                     .fg(Color::Cyan)
                     .add_modifier(Modifier::BOLD),
@@ -164,25 +165,23 @@ fn render_status_bar(f: &mut Frame, app: &App, area: Rect) {
     let status = if app.scanning {
         app.scan_progress
             .clone()
-            .unwrap_or_else(|| "Scanning...".into())
+            .unwrap_or_else(|| translate_status_scanning().into())
     } else if app.cleaning {
         if app.settings.dry_run {
-            "DRY RUN in progress (no files will be deleted)...".into()
+            translate_status_dry_run().into()
         } else {
-            "Cleaning in progress...".into()
+            translate_status_cleaning().into()
         }
     } else {
         let nav_hint = match app.screen {
-            Screen::Dashboard => "Enter:Next  s:Rescan  ?:Help  q:Quit",
-            Screen::Categories => {
-                "Esc:Back  Enter:Next  Space:Toggle  Left/Right:Adjust  a/n/d:Select"
-            }
-            Screen::Projects => "Esc:Back  Enter:Next  Space:Toggle  /:Search",
-            Screen::Preview => "Esc:Back  Enter:Execute  ?:Help",
-            Screen::Cleaning => "s:Rescan  q:Quit",
+            Screen::Dashboard => translate_status_dashboard(),
+            Screen::Categories => translate_status_categories(),
+            Screen::Projects => translate_status_projects(),
+            Screen::Preview => translate_status_preview(),
+            Screen::Cleaning => translate_status_cleaning_done(),
         };
         let dry_run_hint = if app.settings.dry_run {
-            "  [DRY RUN]"
+            "  【干跑】"
         } else {
             ""
         };
@@ -202,7 +201,7 @@ fn render_help_overlay(f: &mut Frame, area: Rect) {
 
     let help_text = vec![
         Line::from(Span::styled(
-            "Keyboard Shortcuts",
+            translate_help_shortcuts_title(),
             Style::default()
                 .fg(Color::Cyan)
                 .add_modifier(Modifier::BOLD),
@@ -210,59 +209,72 @@ fn render_help_overlay(f: &mut Frame, area: Rect) {
         Line::from(""),
         Line::from(vec![
             Span::styled("Enter", Style::default().fg(Color::Yellow)),
-            Span::raw("            Next step"),
+            Span::raw("            "),
+            Span::raw(translate_help_enter()),
         ]),
         Line::from(vec![
             Span::styled("Esc", Style::default().fg(Color::Yellow)),
-            Span::raw("              Previous step"),
+            Span::raw("              "),
+            Span::raw(translate_help_esc()),
         ]),
         Line::from(vec![
             Span::styled("1-5", Style::default().fg(Color::Yellow)),
-            Span::raw("              Jump to step"),
+            Span::raw("              "),
+            Span::raw(translate_help_jump()),
         ]),
         Line::from(vec![
             Span::styled("j/k or Up/Down", Style::default().fg(Color::Yellow)),
-            Span::raw("  Navigate lists"),
+            Span::raw("  "),
+            Span::raw(translate_help_navigate()),
         ]),
         Line::from(vec![
-            Span::styled("Space", Style::default().fg(Color::Yellow)),
-            Span::raw("            Toggle selection"),
+            Span::styled("空格", Style::default().fg(Color::Yellow)),
+            Span::raw("            "),
+            Span::raw(translate_help_toggle()),
         ]),
         Line::from(vec![
             Span::styled("s", Style::default().fg(Color::Yellow)),
-            Span::raw("                Start scan"),
+            Span::raw("                "),
+            Span::raw(translate_help_start_scan()),
         ]),
         Line::from(vec![
             Span::styled("a", Style::default().fg(Color::Yellow)),
-            Span::raw("                Select all"),
+            Span::raw("                "),
+            Span::raw(translate_help_select_all()),
         ]),
         Line::from(vec![
             Span::styled("n", Style::default().fg(Color::Yellow)),
-            Span::raw("                Select none"),
+            Span::raw("                "),
+            Span::raw(translate_help_select_none()),
         ]),
         Line::from(vec![
             Span::styled("d", Style::default().fg(Color::Yellow)),
-            Span::raw("                Default selection"),
+            Span::raw("                "),
+            Span::raw(translate_help_default_selection()),
         ]),
         Line::from(vec![
-            Span::styled("Left/Right", Style::default().fg(Color::Yellow)),
-            Span::raw("       Adjust settings value"),
+            Span::styled("左右方向键", Style::default().fg(Color::Yellow)),
+            Span::raw("       "),
+            Span::raw(translate_help_adjust_settings()),
         ]),
         Line::from(vec![
             Span::styled("/", Style::default().fg(Color::Yellow)),
-            Span::raw("                Search filter (Projects)"),
+            Span::raw("                "),
+            Span::raw(translate_help_search()),
         ]),
         Line::from(vec![
             Span::styled("q / Ctrl-C", Style::default().fg(Color::Yellow)),
-            Span::raw("       Quit"),
+            Span::raw("       "),
+            Span::raw(translate_help_quit()),
         ]),
         Line::from(vec![
             Span::styled("?", Style::default().fg(Color::Yellow)),
-            Span::raw("                Toggle this help"),
+            Span::raw("                "),
+            Span::raw(translate_help_toggle_help()),
         ]),
         Line::from(""),
         Line::from(Span::styled(
-            "Press ? or Esc to close",
+            translate_help_close_hint(),
             Style::default().fg(Color::DarkGray),
         )),
     ];
@@ -271,7 +283,7 @@ fn render_help_overlay(f: &mut Frame, area: Rect) {
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title(" Help ")
+                .title(translate_help_title())
                 .title_style(Style::default().fg(Color::Cyan)),
         )
         .wrap(Wrap { trim: false });
@@ -286,7 +298,7 @@ fn render_confirm_dialog(f: &mut Frame, area: Rect, dry_run: bool) {
     let mut text = vec![
         Line::from(""),
         Line::from(Span::styled(
-            "Are you sure you want to proceed with cleaning?",
+            translate_confirm_question(),
             Style::default()
                 .fg(Color::Yellow)
                 .add_modifier(Modifier::BOLD),
@@ -296,14 +308,14 @@ fn render_confirm_dialog(f: &mut Frame, area: Rect, dry_run: bool) {
 
     if dry_run {
         text.push(Line::from(Span::styled(
-            "DRY RUN: No files will actually be deleted.",
+            translate_confirm_dry_run_warning(),
             Style::default()
                 .fg(Color::Cyan)
                 .add_modifier(Modifier::BOLD),
         )));
     } else {
         text.push(Line::from(Span::styled(
-            "WARNING: This action cannot be undone!",
+            translate_confirm_warning(),
             Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
         )));
     }
@@ -316,18 +328,21 @@ fn render_confirm_dialog(f: &mut Frame, area: Rect, dry_run: bool) {
                 .fg(Color::Green)
                 .add_modifier(Modifier::BOLD),
         ),
-        Span::raw(" = Confirm    "),
+        Span::raw(" = "),
+        Span::styled(translate_confirm_confirm(), Style::default().fg(Color::Green)),
+        Span::raw("    "),
         Span::styled(
             "Esc",
             Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
         ),
-        Span::raw(" = Cancel"),
+        Span::raw(" = "),
+        Span::styled(translate_confirm_cancel(), Style::default().fg(Color::Red)),
     ]));
 
     let title = if dry_run {
-        " Confirm Dry Run "
+        translate_confirm_dry_run_title()
     } else {
-        " Confirm Clean "
+        translate_confirm_title()
     };
     let title_color = if dry_run { Color::Cyan } else { Color::Red };
 

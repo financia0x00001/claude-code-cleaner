@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="GarrickZ2/claude-code-cleaner"
+REPO="financia0x00001/claude-code-cleaner"
 BIN="claude-code-cleaner"
 
 # Colors

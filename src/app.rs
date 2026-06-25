@@ -1,4 +1,5 @@
 use crate::cleaner::CleanMessage;
+use crate::i18n::*;
 use crate::model::*;
 use crate::scanner::ScanMessage;
 
@@ -22,11 +23,11 @@ impl Screen {
 
     pub fn title(&self) -> &'static str {
         match self {
-            Screen::Dashboard => "Scan",
-            Screen::Categories => "Select",
-            Screen::Projects => "Projects",
-            Screen::Preview => "Preview",
-            Screen::Cleaning => "Clean",
+            Screen::Dashboard => translate_step_label("Scan"),
+            Screen::Categories => translate_step_label("Select"),
+            Screen::Projects => translate_step_label("Projects"),
+            Screen::Preview => translate_step_label("Preview"),
+            Screen::Cleaning => translate_step_label("Clean"),
         }
     }
 

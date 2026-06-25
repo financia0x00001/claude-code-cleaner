@@ -1,4 +1,5 @@
 use crate::app::App;
+use crate::i18n::*;
 use crate::ui::widgets;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::style::{Color, Modifier, Style};
@@ -19,7 +20,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
 
     let block = Block::default()
         .borders(Borders::ALL)
-        .title(" Preview Clean Plan ")
+        .title(translate_preview_title())
         .title_style(
             Style::default()
                 .fg(Color::Cyan)
@@ -58,19 +59,28 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
 
         // Line 1: sizes
         let label_line = Line::from(vec![
-            Span::styled(" Clean: ", Style::default().fg(Color::DarkGray)),
+            Span::styled(
+                format!("{}: ", translate_preview_clean_label()),
+                Style::default().fg(Color::DarkGray),
+            ),
             Span::styled(
                 widgets::format_size(will_clean),
                 Style::default()
                     .fg(Color::Green)
                     .add_modifier(Modifier::BOLD),
             ),
-            Span::styled("  Skipped: ", Style::default().fg(Color::DarkGray)),
+            Span::styled(
+                format!("  {}: ", translate_preview_skipped_label()),
+                Style::default().fg(Color::DarkGray),
+            ),
             Span::styled(
                 widgets::format_size(skipped),
                 Style::default().fg(Color::Yellow),
             ),
-            Span::styled("  Total: ", Style::default().fg(Color::DarkGray)),
+            Span::styled(
+                format!("  {}: ", translate_preview_total_label()),
+                Style::default().fg(Color::DarkGray),
+            ),
             Span::styled(
                 widgets::format_size(total),
                 Style::default().fg(Color::White),
@@ -93,21 +103,26 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         // Line 3: legend
         let legend_line = Line::from(vec![
             Span::styled(" \u{25A0}", Style::default().fg(Color::Green)),
-            Span::styled(" Will clean  ", Style::default().fg(Color::DarkGray)),
+            Span::styled(translate_preview_legend_clean(), Style::default().fg(Color::DarkGray)),
             Span::styled("\u{25A0}", Style::default().fg(Color::Yellow)),
             Span::styled(
-                " Matchable (unselected)  ",
+                translate_preview_legend_unselected(),
                 Style::default().fg(Color::DarkGray),
             ),
             Span::styled("\u{25A0}", Style::default().fg(Color::Red)),
-            Span::styled(" Not matched (kept)", Style::default().fg(Color::DarkGray)),
+            Span::styled(translate_preview_legend_kept(), Style::default().fg(Color::DarkGray)),
         ]);
 
         let bar = Paragraph::new(vec![label_line, bar_line, legend_line]).block(Block::default());
         f.render_widget(bar, chunks[0]);
 
         // Summary table
-        let header = Row::new(vec!["Category", "Files", "Size", "Action"])
+        let header = Row::new(vec![
+            translate_preview_table_category(),
+            translate_preview_table_files(),
+            translate_preview_table_size(),
+            translate_preview_table_action(),
+        ])
             .style(
                 Style::default()
                     .fg(Color::Cyan)
@@ -122,9 +137,9 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
                 continue;
             }
             let action = if cat.category.is_trim_only() {
-                "Trim to 500 lines".to_string()
+                translate_preview_action_trim().to_string()
             } else {
-                format!("Delete (>{}d)", expiry)
+                format!("{}（大于{}天）", translate_preview_action_delete(), expiry)
             };
 
             let exp_count = cat.expired_count(expiry);
@@ -162,20 +177,26 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
                 let active_count = selected_projects.len() - orphan_count;
                 let label = if orphan_count > 0 && active_count > 0 {
                     format!(
-                        "Projects ({} orphan + {} active)",
-                        orphan_count, active_count
+                        "项目{}",
+                        translate_format_orphan_active(orphan_count, active_count)
                     )
                 } else if orphan_count > 0 {
-                    format!("Projects ({} orphan)", orphan_count)
+                    format!(
+                        "项目{}",
+                        translate_format_orphan(orphan_count)
+                    )
                 } else {
-                    format!("Projects ({} active)", active_count)
+                    format!(
+                        "项目{}",
+                        translate_format_active(active_count)
+                    )
                 };
                 rows.push(
                     Row::new(vec![
                         label,
                         format!("{}", total_proj_files),
                         widgets::format_size(total_proj_size),
-                        format!("Delete (>{}d / orphan)", expiry),
+                        format!("{}（大于{}天/孤立）", translate_preview_action_delete_orphan(), expiry),
                     ])
                     .style(Style::default().fg(Color::Red)),
                 );
@@ -198,10 +219,10 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
             }
             rows.push(
                 Row::new(vec![
-                    "Config JSON".to_string(),
+                    translate_preview_config_json_label().to_string(),
                     "1".to_string(),
                     widgets::format_size(cj_reclaimable),
-                    format!("Clean ({})", parts.join(", ")),
+                    format!("{}（{}）", translate_preview_config_clean_label(), translate_preview_config_parts(&parts.to_vec())),
                 ])
                 .style(Style::default().fg(Color::Magenta)),
             );
@@ -222,9 +243,9 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
 
         // Action bar
         let start_label = if app.settings.dry_run {
-            " Start Dry Run  "
+            translate_preview_start_dry_run()
         } else {
-            " Start Cleaning  "
+            translate_preview_start_clean()
         };
         let mut action_spans = vec![
             Span::raw("  "),
@@ -236,16 +257,17 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
             ),
             Span::raw(start_label),
             Span::styled("[Esc]", Style::default().fg(Color::Yellow)),
-            Span::raw(" Go Back  "),
+            Span::raw(" "),
+            Span::styled(translate_preview_go_back(), Style::default().fg(Color::White)),
             Span::raw(format!(
-                "  Total: {} files, {}",
+                "  总计：{} 个文件，{}",
                 result.selected_file_count(expiry),
                 widgets::format_size(will_clean),
             )),
         ];
         if app.settings.dry_run {
             action_spans.push(Span::styled(
-                "  [DRY RUN]",
+                format!("  [{}]", translate_preview_dry_run_tag()),
                 Style::default()
                     .fg(Color::Cyan)
                     .add_modifier(Modifier::BOLD),
@@ -254,7 +276,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         let action_bar = Paragraph::new(Line::from(action_spans));
         f.render_widget(action_bar, chunks[2]);
     } else {
-        let p = Paragraph::new("No scan data. Run a scan first.")
+        let p = Paragraph::new(translate_preview_no_data())
             .style(Style::default().fg(Color::DarkGray));
         f.render_widget(p, chunks[1]);
     }

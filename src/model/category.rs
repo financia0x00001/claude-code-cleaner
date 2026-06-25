@@ -1,3 +1,4 @@
+use crate::i18n::translate_category_static;
 use std::fmt;
 use std::path::Path;
 
@@ -97,22 +98,23 @@ impl Category {
 
 impl fmt::Display for Category {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Category::Projects => write!(f, "Projects"),
-            Category::DebugLogs => write!(f, "Debug Logs"),
-            Category::FileHistory => write!(f, "File History"),
-            Category::Telemetry => write!(f, "Telemetry"),
-            Category::ShellSnapshots => write!(f, "Shell Snapshots"),
-            Category::Plugins => write!(f, "Plugins"),
-            Category::Transcripts => write!(f, "Transcripts"),
-            Category::Todos => write!(f, "Todos"),
-            Category::Plans => write!(f, "Plans"),
-            Category::UsageData => write!(f, "Usage Data"),
-            Category::Tasks => write!(f, "Tasks"),
-            Category::PasteCache => write!(f, "Paste Cache"),
-            Category::ConfigBackups => write!(f, "Config Backups"),
-            Category::History => write!(f, "History"),
-        }
+        let english = match self {
+            Category::Projects => "Projects",
+            Category::DebugLogs => "Debug Logs",
+            Category::FileHistory => "File History",
+            Category::Telemetry => "Telemetry",
+            Category::ShellSnapshots => "Shell Snapshots",
+            Category::Plugins => "Plugins",
+            Category::Transcripts => "Transcripts",
+            Category::Todos => "Todos",
+            Category::Plans => "Plans",
+            Category::UsageData => "Usage Data",
+            Category::Tasks => "Tasks",
+            Category::PasteCache => "Paste Cache",
+            Category::ConfigBackups => "Config Backups",
+            Category::History => "History",
+        };
+        write!(f, "{}", translate_category_static(english))
     }
 }
 

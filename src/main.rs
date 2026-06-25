@@ -1,6 +1,7 @@
 mod app;
 mod cleaner;
 mod event;
+mod i18n;
 mod model;
 mod scanner;
 mod ui;
