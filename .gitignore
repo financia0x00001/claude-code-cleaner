@@ -45,3 +45,5 @@ $RECYCLE.BIN/
 # Debug
 *.dSYM/
 core
+*.claude/
+CLAUDE.md
