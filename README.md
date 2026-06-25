@@ -6,85 +6,76 @@
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
 
-> 🧹 **Interactive TUI tool to reclaim disk space from Claude Code**
+> 🧹 **交互式终端清理工具，释放 Claude Code 占用的磁盘空间**
 
-After extended use, `~/.claude/` can grow to **1.8 GB+** across **10,000+ files** — old session data, debug logs, telemetry, orphaned project caches, and more. This tool helps you see exactly what's there, choose what to clean, and safely reclaim space.
+> **Interactive TUI tool to reclaim disk space from Claude Code**
 
-[Features](#features) · [Installation](#installation) · [Usage](#usage) · [Safety](#safety)
+Claude Code 长期使用后，`~/.claude/` 目录可能膨胀到 **1.8 GB+**、**10000+ 文件** —— 包含旧会话数据、调试日志、遥测数据、孤立的项目缓存等。本工具帮助你直观地查看这些内容，选择要清理的部分，安全地释放磁盘空间。
+
+[English](#english) · [功能](#features) · [安装](#installation) · [使用](#usage)
 
 </div>
 
-## Screenshots
+## 功能 Features
 
-![Scan](screenshot/scan.jpeg)
-![Preview](screenshot/preview.png)
+- **5 步引导式工作流**：扫描 → 选择 → 项目 → 预览 → 清理
+- **智能扫描**：检测所有可清理的数据分类，按文件年龄追踪
+- **孤立项目检测**：自动识别原始路径已不存在的项目缓存
+- **过期过滤**：仅清理超过设定天数（默认 30 天）的文件
+- **精准清理 `.claude.json`**：移除孤立的条目、会话指标和缓存，不删除原文件
+- **三段式预览栏**：绿色=将清理，黄色=匹配但未选，红色=保留
+- **实时进度条**：清理过程中实时显示各分类进度
+- **偏好设置持久化**：你的选择会在下次启动时自动恢复
+- **干跑模式**：预览将删除的内容，不实际触碰任何文件
+- **受保护路径**：`settings.json`、`CLAUDE.md`、`skills/` 等关键文件永不删除
 
-## Features
+## 可清理分类 Cleanable Categories
 
-- **5-screen guided workflow**: Scan → Select → Projects → Preview → Clean
-- **Smart scanning**: Detects all cleanable data categories with per-file age tracking
-- **Orphan project detection**: Identifies project caches where the original project path no longer exists
-- **Expiry-based filtering**: Only clean files older than a configurable threshold (default: 30 days)
-- **Surgical `~/.claude.json` cleanup**: Remove orphan project entries, session metrics, and stale caches from the config file without deleting it
-- **3-segment preview bar**: Visualize what will be cleaned (green), what's matchable but unselected (yellow), and what's kept (red)
-- **Progress bar**: Real-time progress tracking during cleaning with per-category breakdown
-- **Persistent preferences**: Your selections and settings are saved and restored between sessions
-- **Dry run mode**: Preview exactly what would be deleted without touching any files
-- **Protected paths**: `settings.json`, `CLAUDE.md`, `skills/`, `commands/`, `agents/`, `ide/`, and `credentials.json` are never cleaned
-
-## Cleanable Categories
-
-| Category | Directory/File | Description |
+| 分类 | 目录/文件 | 说明 |
 |---|---|---|
-| Projects | `projects/` | Per-project session data (typically the largest) |
-| Debug Logs | `debug/` | Debug log files |
-| File History | `file-history/` | File version snapshots |
-| Telemetry | `telemetry/` | Telemetry data |
-| Shell Snapshots | `shell-snapshots/` | Shell environment snapshots |
-| Plugins | `plugins/` | Plugin cache |
-| Transcripts | `transcripts/` | Old session transcripts |
-| Todos | `todos/` | Todo items |
-| Plans | `plans/` | Plan documents |
-| Usage Data | `usage-data/` | Usage analytics |
-| Tasks | `tasks/` | Task management data |
-| Paste Cache | `paste-cache/` | Clipboard cache |
-| Config Backups | `~/.claude.json.backup*` | Config backup files |
-| History | `history.jsonl` | Command history (trimmed, not deleted) |
-| Config JSON | `~/.claude.json` | Surgical field cleanup (orphans, metrics, caches) |
+| Projects | `projects/` | 项目会话数据（通常占用最大） |
+| Debug Logs | `debug/` | 调试日志文件 |
+| File History | `file-history/` | 文件版本快照 |
+| Telemetry | `telemetry/` | 遥测数据 |
+| Shell Snapshots | `shell-snapshots/` | Shell 环境快照 |
+| Plugins | `plugins/` | 插件缓存 |
+| Transcripts | `transcripts/` | 旧会话记录 |
+| Todos | `todos/` | 待办事项 |
+| Plans | `plans/` | 计划文档 |
+| Usage Data | `usage-data/` | 使用分析数据 |
+| Tasks | `tasks/` | 任务管理数据 |
+| Paste Cache | `paste-cache/` | 剪贴板缓存 |
+| Config Backups | `~/.claude.json.backup*` | 配置文件备份 |
+| History | `history.jsonl` | 命令历史（仅修剪，不删除） |
+| Config JSON | `~/.claude.json` | 精准字段清理 |
 
-## Installation
+## 安装 Installation
 
-### Quick install (Linux / macOS / Windows)
+### 快速安装（Linux / macOS / Windows）
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/financia0x00001/claude-code-cleaner/master/install.sh | bash
 ```
 
-Or install a specific version:
+指定版本安装：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/financia0x00001/claude-code-cleaner/master/install.sh | bash -s v0.1.2
 ```
 
-Custom install directory (Linux / macOS):
+Windows (Git Bash / WSL) 安装到 `%LOCALAPPDATA%\claude-code-cleaner\bin\`。
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/financia0x00001/claude-code-cleaner/master/install.sh | INSTALL_DIR=~/.local/bin bash
-```
-
-On Windows (Git Bash / WSL), the binary is installed to `%LOCALAPPDATA%\claude-code-cleaner\bin\`.
-
-### Via cargo
+### 通过 cargo
 
 ```bash
 cargo install claude-code-cleaner
 ```
 
-### From GitHub Releases
+### 从 Releases 下载
 
-Download the latest binary for your platform from [Releases](https://github.com/financia0x00001/claude-code-cleaner/releases), extract, and place it in your `$PATH` (Linux/macOS) or `%LOCALAPPDATA%\claude-code-cleaner\bin\` (Windows).
+从 [Releases](https://github.com/financia0x00001/claude-code-cleaner/releases) 下载对应平台的二进制文件。
 
-### From source
+### 从源码编译
 
 ```bash
 git clone https://github.com/financia0x00001/claude-code-cleaner.git
@@ -92,119 +83,91 @@ cd claude-code-cleaner
 cargo build --release
 ```
 
-The binary will be at `target/release/claude-code-cleaner` (Linux/macOS) or `target/release/claude-code-cleaner.exe` (Windows).
-
-## Usage
+## 使用 Usage
 
 ```bash
 claude-code-cleaner
 ```
 
-The tool launches a full-screen TUI with 5 screens:
+启动后自动扫描 `~/.claude/` 目录，进入全屏 TUI 界面。
 
-### 1. Dashboard (Scan)
+### 5 个屏幕
 
-Displays an overview of your `~/.claude/` directory — total size, file count, and per-category breakdown with usage bars. A scan runs automatically on startup.
+1. **仪表盘（扫描）** — 显示总大小、文件数、按分类统计
+2. **选择** — 勾选要清理的分类，调整过期天数，开启干跑模式
+3. **项目** — 浏览所有项目，区分孤立项目和活跃项目
+4. **预览** — 可视化清理计划（绿=将清理，黄=匹配未选，红=保留）
+5. **清理** — 执行清理，实时进度条，显示释放空间
 
-### 2. Select
+### 键盘快捷键
 
-Choose which categories to clean with checkboxes. This screen has three sections:
-
-- **Categories**: Toggle individual data categories on/off
-- **Config JSON**: Select surgical cleanup options for `~/.claude.json` (orphan entries, metrics, caches)
-- **Settings**: Adjust expiry threshold (days) and dry run mode
-
-File counts and sizes update dynamically as you change the expiry threshold.
-
-### 3. Projects
-
-Browse all projects with their status:
-
-- **ORPHAN** (red): Original project path no longer exists — entire cache will be deleted
-- **active** (green): Project still exists — only files older than the expiry threshold are cleaned
-
-Use `/` to search/filter, `a` to select all, `o` to select orphans only.
-
-### 4. Preview
-
-Review the full clean plan before executing. The 3-segment bar shows:
-
-- **Green**: Space that will be cleaned this run
-- **Yellow**: Space that matches rules but isn't selected
-- **Red**: Space that doesn't match any cleanup rules
-
-Press `Enter` to confirm and start cleaning.
-
-### 5. Clean
-
-Executes the clean plan with a real-time progress bar and per-category log. Shows total freed space and any errors on completion.
-
-## Keyboard Shortcuts
-
-| Key | Action |
+| 按键 | 功能 |
 |---|---|
-| `1`-`5` | Jump to screen |
-| `Tab` / `Shift-Tab` | Next / previous screen |
-| `j`/`k` or `Up`/`Down` | Navigate lists |
-| `Space` | Toggle selection |
-| `Enter` | Confirm / proceed |
-| `Esc` | Go back |
-| `a` | Select all |
-| `n` | Unselect all |
-| `d` | Reset to defaults |
-| `o` | Select orphan projects only (Projects screen) |
-| `/` | Search/filter (Projects screen) |
-| `Left`/`Right` | Adjust settings values |
-| `s` | Rescan (after cleaning) |
-| `q` / `Ctrl-C` | Quit |
-| `?` | Help overlay |
+| `1`-`5` | 跳转到指定屏幕 |
+| `Tab` / `Shift-Tab` | 上/下一步 |
+| `j`/`k` 或 `↑`/`↓` | 列表导航 |
+| `Space` | 选择/取消 |
+| `Enter` | 确认/继续 |
+| `Esc` | 返回 |
+| `a` | 全选 |
+| `n` | 全不选 |
+| `o` | 只选孤立项目 |
+| `/` | 搜索过滤 |
+| `s` | 重新扫描 |
+| `?` | 帮助 |
+| `q` | 退出 |
 
-## Safety
+## 安全性 Safety
 
-- **Protected paths** are never modified or deleted
-- **History** is trimmed (keeps last 500 lines), not deleted
-- **Config JSON** is cleaned surgically with atomic writes (write to temp file, then rename)
-- **Active projects** only have expired files removed; the project directory and recent files are preserved
-- Failed deletions are collected and reported — they never interrupt the process
-- Preferences are saved to `~/.claude/cleaner-preferences.json`
+- **受保护路径** 永不修改或删除
+- **命令历史** 仅修剪（保留最后 500 行），不删除
+- **配置文件** 以原子写入方式清理
+- **活跃项目** 仅删除过期文件，保留目录和近期文件
+- **干跑模式** 预览将删除的内容，不实际触碰文件
+- 失败删除会被收集报告，不会中断进程
 
-## Project Structure
+## 系统要求 Requirements
 
-```
-src/
-  main.rs             # Entry point, terminal setup, event loop, key handling
-  app.rs              # App state machine, Screen enum, preferences
-  event.rs            # Event loop: crossterm input + tick + async channels
-  ui/
-    mod.rs            # Render dispatcher
-    dashboard.rs      # Scan overview screen
-    categories.rs     # Unified Select screen (categories + config json + settings)
-    projects.rs       # Project browser with orphan/active status
-    preview.rs        # Clean plan preview with 3-segment bar
-    cleaning.rs       # Cleaning progress with progress bar
-    widgets/          # Shared UI helpers (format_size, format_age, etc.)
-  scanner/
-    mod.rs            # Async scan dispatcher
-    categories.rs     # Category scanning + config JSON analysis
-    projects.rs       # Project scanning + orphan detection
-  cleaner/
-    mod.rs            # Async clean executor with progress reporting
-  model/
-    mod.rs            # Shared data types
-    category.rs       # Category enum, CategoryInfo, protected paths
-    project.rs        # ProjectInfo with expiry-based filtering
-    scan_result.rs    # ScanResult with reclaimable/matchable calculations
-    config_json.rs    # ConfigJsonInfo for surgical JSON cleanup
-    settings.rs       # CleanSettings + UserPreferences persistence
-    clean_plan.rs     # Clean plan types
-```
+- Rust 1.70+（从源码编译时需要）
+- 支持 Unicode 的终端
+- **Windows**：Git Bash（运行 install.sh）或 WSL；也可用 `cargo install` 或从 Releases 下载
 
-## Requirements
+---
 
-- Rust 1.70+ (to build from source)
-- A terminal with Unicode support
-- **Windows**: Git Bash (for `install.sh`) or WSL; alternatively use `cargo install` or download from Releases
+<a name="english"></a>
+
+## English
+
+### Overview
+
+Claude Code Cleaner is an interactive terminal UI (TUI) tool designed to reclaim disk space consumed by Claude Code's `~/.claude/` directory. After extended usage, this directory can accumulate over **1.8 GB** across **10,000+ files**, including old session data, debug logs, telemetry, orphaned project caches, and more.
+
+### What it does
+
+The tool provides a guided 5-screen workflow that helps you:
+1. **Scan** — Automatically analyze the `~/.claude/` directory and categorize files by size and age
+2. **Select** — Choose which categories to clean, adjust the expiry threshold, and enable dry-run mode
+3. **Projects** — Browse detected projects, identify orphans (projects whose original paths no longer exist)
+4. **Preview** — Review the full clean plan with a visual 3-segment progress bar
+5. **Clean** — Execute the plan with real-time progress tracking
+
+### Why this fork
+
+This is a **Windows-compatible fork** of the original [claude-code-cleaner](https://github.com/GarrickZ2/claude-code-cleaner) by [GarrickZ2](https://github.com/GarrickZ2). The original project only supported Linux and macOS. This fork adds:
+
+- **Full Windows support** — Git Bash, WSL, and native Windows terminal compatibility
+- **Windows installer** — `install.sh` now detects Windows and handles `.zip` packages
+- **CI/CD** — GitHub Actions builds and publishes Windows binaries (`.exe`) to Releases
+- **Chinese documentation** — Bilingual README with Chinese instructions
+
+### Big thanks to the original author
+
+> 🙏 **Special thanks to [GarrickZ2](https://github.com/GarrickZ2) for the excellent original project.**
+>
+> The core design, TUI implementation, scanning logic, and safety mechanisms were all created by the original author. This fork only adds Windows compatibility and bilingual documentation on top of their outstanding work.
 
 ## License
 
-MIT
+MIT — See [LICENSE](LICENSE) file for details.
+
+> This project is a derivative work based on [claude-code-cleaner](https://github.com/GarrickZ2/claude-code-cleaner) by GarrickZ2, licensed under the MIT License.
